@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Highlight IP Lookup</title>
+    <style>
+      body {
+        font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
+        font-size: 12px;
+        padding: 15px;
+      }
+      #status {
+        opacity: 0;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        width: 200px;
+        max-width: 768px;
+        transition: opacity .5s ease .15s;
+      }
+      #status.is-active {
+        opacity: 1;
+      }
+    </style>
+    <script src="popup.js"></script>
+  </head>
+  <body>
+    <div id="status">Loading...</div>
+  </body>
+</html>
+
