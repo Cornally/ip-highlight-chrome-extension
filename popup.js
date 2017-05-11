@@ -1,3 +1,7 @@
+const innerText = document.body.innerText;
+const ipRegex = new RegExp("\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b");
+const firstIP = ipRegex.test(innerText) || null;
+
 /**
  * @param {string} callback - Called when the selected text is obtained
  */
@@ -5,7 +9,14 @@ function getSelectedIp(callback) {
   chrome.tabs.executeScript({
     code: "window.getSelection().toString();"
   }, (selection) => {
-    callback(selection[0] || 'google.com');
+    if (selection) {
+      callback(selection[0] || 'google.com');
+    } else {
+      renderStatus(`
+          <h1>No IP Selected</h1>
+          <p>Highlight a host or IP and then click the icon again for reverse-lookup information.  Happy stalking!</p>
+      `);
+    }
   });
 }
 
@@ -16,7 +27,7 @@ function getSelectedIp(callback) {
  *   The callback gets a string that describes the failure reason.
  */
 function getIpLocation(searchAddress, callback, errorCallback) {
-  let searchUrl = 'http://freegeoip.net/json/' + searchAddress;
+  let searchUrl = 'http://ip-api.com/json/' + searchAddress;
   let x = new XMLHttpRequest();
   x.open('GET', searchUrl);
   x.responseType = 'json';
@@ -36,14 +47,30 @@ function getIpLocation(searchAddress, callback, errorCallback) {
 
 function renderStatus(statusText) {
   const statusEl = document.getElementById('status');
-  statusEl.textContent = statusText;
+  statusEl.innerHTML = statusText;
   statusEl.className += 'is-active';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   getSelectedIp((url) => {
     getIpLocation(url, (response) => {
-      renderStatus(`${response.city}, ${response.region_code}, ${response.country_code}`);
+      renderStatus(`
+          <h1>Results For ${response.query}</h1>
+          <table>
+          <tr>
+            <td class="label">Location:</td>
+            <td title="${ response.city ? response.city + ', ' : ''} ${ response.regionName ? response.regionName + ', ' : ''} ${ response.countryCode ? response.countryCode : ''}">${ response.city ? response.city + ', ' : ''} ${ response.regionName ? response.regionName + ', ' : ''} ${ response.countryCode ? response.countryCode : ''}</td>
+          </tr>
+          <tr>
+            <td class="label">ISP:</td>
+            <td title="${ response.isp ? response.isp + ', ' : ''} ${ response.org ? response.org : ''}">${ response.isp ? response.isp + ', ' : ''} ${ response.org ? response.org : ''}</td>
+          </tr>
+          <tr>
+            <td class="label">Google Maps:</td>
+            <td><a href="https://www.google.com/maps/@${response.lat},${response.lon},13z" target="_blank">View Location</a></td>
+          </tr>
+          </table>
+      `);
     }, (errorMessage) => {
       renderStatus('Cannot locate host. ' + errorMessage);
     });
