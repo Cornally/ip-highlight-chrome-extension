@@ -1,7 +1,3 @@
-const innerText = document.body.innerText;
-const ipRegex = new RegExp("\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b");
-const firstIP = ipRegex.test(innerText) || null;
-
 /**
  * @param {string} callback - Called when the selected text is obtained
  */
