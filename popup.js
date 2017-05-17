@@ -5,8 +5,8 @@ function getSelectedIp(callback) {
   chrome.tabs.executeScript({
     code: "window.getSelection().toString();"
   }, (selection) => {
-    if (selection) {
-      callback(selection[0] || 'google.com');
+    if (selection && selection.length) {
+      callback(selection[0]);
     } else {
       renderStatus(`
           <h1>No IP Selected</h1>

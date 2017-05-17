@@ -1,2 +1,2 @@
-# ip-highlight
-Chrome extension to find the city, state, country code of the selected (highlighted) IP address in the active tab.
+# HighLight IP Lookup
+Chrome extension to find the city, state, country code of the selected (highlighted) IP address in the active tab.  [Click here](https://chrome.google.com/webstore/detail/highlight-ip-lookup/ieepfodddhpbeabnpaikeimelgejgkhn?hl=en) to view it in the Chrome Web Store.
