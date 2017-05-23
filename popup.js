@@ -32,6 +32,9 @@ function getIpLocation(searchAddress, callback, errorCallback) {
     if (!response) {
       errorCallback('No response!');
       return;
+    } else if (response.status === 'fail') {
+      errorCallback('No response!');
+      return;
     }
     callback(response);
   };
@@ -68,7 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
           </table>
       `);
     }, (errorMessage) => {
-      renderStatus('Cannot locate host. ' + errorMessage);
+      renderStatus(`
+          <h1>Cannot locate host</h1>
+          <p>Highlight a host or IP and then click the icon again for reverse-lookup information.  Happy stalking!</p>
+      `);
     });
   });
 });
