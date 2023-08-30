@@ -1,4 +1,5 @@
 /**
+ * Select the current tab and its respective highlighted text.
  * @param {string} callback - Called when the selected text is obtained
  */
 async function getSelectedIp(callback) {
@@ -23,33 +24,34 @@ async function getSelectedIp(callback) {
 }
 
 /**
+ * Get the location of an IP address.
  * @param {string} searchAddress - IP or host being searched.
  * @param {function(string)} callback - Called when a location has been resolved
  * @param {function(string)} errorCallback - Called when the location is not found.
  *   The callback gets a string that describes the failure reason.
  */
-function getIpLocation(searchAddress, callback, errorCallback) {
+async function getIpLocation(searchAddress, callback, errorCallback) {
   let searchUrl = 'http://ip-api.com/json/' + searchAddress;
-  let x = new XMLHttpRequest();
-  x.open('GET', searchUrl);
-  x.responseType = 'json';
-  x.onload = () => {
-    const response = x.response;
-    if (!response) {
+  try {
+    const response = await fetch(searchUrl);
+    const data = await response.json();
+    if (!data) {
       errorCallback('No response!');
       return;
-    } else if (response.status === 'fail') {
+    } else if (data.status === 'fail') {
       errorCallback('No response!');
       return;
     }
-    callback(response);
-  };
-  x.onerror = () => {
+    callback(data);
+  } catch (err) {
     errorCallback('Network error.');
-  };
-  x.send();
+  }
 }
 
+/**
+ * Render results to the popup.
+ * @param {*} statusText 
+ */
 function renderStatus(statusText) {
   const statusEl = document.getElementById('status');
   statusEl.innerHTML = statusText;
