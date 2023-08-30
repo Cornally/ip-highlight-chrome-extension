@@ -1,19 +1,23 @@
 /**
  * @param {string} callback - Called when the selected text is obtained
  */
-function getSelectedIp(callback) {
-  chrome.tabs.executeScript({
-    code: "window.getSelection().toString();"
-  }, (selection) => {
-    if (selection && selection.length) {
-      callback(selection[0]);
-    } else {
+async function getSelectedIp(callback) {
+  const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+    const tabId = tab.id;
+    let result;
+    try {
+      [{result}] = await chrome.scripting.executeScript({
+        target: {tabId, allFrames: true},
+        function: () => getSelection().toString(),
+      });
+    } catch (e) {
       renderStatus(`
           <h1>No IP Selected</h1>
           <p>Highlight a host or IP and then click the icon again for reverse-lookup information.  Happy stalking!</p>
       `);
+      return; // ignoring an unsupported page like chrome://extensions
     }
-  });
+    callback(result)
 }
 
 /**
