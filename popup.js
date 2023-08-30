@@ -1,49 +1,57 @@
 /**
+ * Select the current tab and its respective highlighted text.
  * @param {string} callback - Called when the selected text is obtained
  */
-function getSelectedIp(callback) {
-  chrome.tabs.executeScript({
-    code: "window.getSelection().toString();"
-  }, (selection) => {
-    if (selection && selection.length) {
-      callback(selection[0]);
-    } else {
+async function getSelectedIp(callback) {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const tabId = tab.id;
+    let result;
+
+    try {
+      [{ result }] = await chrome.scripting.executeScript({
+        target: {tabId, allFrames: true},
+        function: () => getSelection().toString(),
+      });
+    } catch (e) {
       renderStatus(`
           <h1>No IP Selected</h1>
           <p>Highlight a host or IP and then click the icon again for reverse-lookup information.  Happy stalking!</p>
       `);
+      return; // ignoring an unsupported page like chrome://extensions
     }
-  });
+
+    callback(result)
 }
 
 /**
+ * Get the location of an IP address.
  * @param {string} searchAddress - IP or host being searched.
  * @param {function(string)} callback - Called when a location has been resolved
  * @param {function(string)} errorCallback - Called when the location is not found.
  *   The callback gets a string that describes the failure reason.
  */
-function getIpLocation(searchAddress, callback, errorCallback) {
+async function getIpLocation(searchAddress, callback, errorCallback) {
   let searchUrl = 'http://ip-api.com/json/' + searchAddress;
-  let x = new XMLHttpRequest();
-  x.open('GET', searchUrl);
-  x.responseType = 'json';
-  x.onload = () => {
-    const response = x.response;
-    if (!response) {
+  try {
+    const response = await fetch(searchUrl);
+    const data = await response.json();
+    if (!data) {
       errorCallback('No response!');
       return;
-    } else if (response.status === 'fail') {
+    } else if (data.status === 'fail') {
       errorCallback('No response!');
       return;
     }
-    callback(response);
-  };
-  x.onerror = () => {
+    callback(data);
+  } catch (err) {
     errorCallback('Network error.');
-  };
-  x.send();
+  }
 }
 
+/**
+ * Render results to the popup.
+ * @param {*} statusText 
+ */
 function renderStatus(statusText) {
   const statusEl = document.getElementById('status');
   statusEl.innerHTML = statusText;
