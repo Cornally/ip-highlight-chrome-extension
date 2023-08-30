@@ -2,11 +2,12 @@
  * @param {string} callback - Called when the selected text is obtained
  */
 async function getSelectedIp(callback) {
-  const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     const tabId = tab.id;
     let result;
+
     try {
-      [{result}] = await chrome.scripting.executeScript({
+      [{ result }] = await chrome.scripting.executeScript({
         target: {tabId, allFrames: true},
         function: () => getSelection().toString(),
       });
@@ -17,6 +18,7 @@ async function getSelectedIp(callback) {
       `);
       return; // ignoring an unsupported page like chrome://extensions
     }
+
     callback(result)
 }
 
